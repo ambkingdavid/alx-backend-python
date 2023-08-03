@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """a module that defines to_kv function"""
 
 from typing import Union, Tuple
