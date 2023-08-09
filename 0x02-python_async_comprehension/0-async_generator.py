@@ -3,11 +3,10 @@
 
 import asyncio
 import random
-from types import NoneType
-from typing import Generator
+from typing import AsyncGenerator
 
 
-async def async_generator() -> Generator[float, NoneType, NoneType] :
+async def async_generator() -> AsyncGenerator[float, None] :
     """an Async generator"""
     for _ in range(10):
         await asyncio.sleep(1)
