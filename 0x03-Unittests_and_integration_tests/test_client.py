@@ -3,12 +3,51 @@
 This module tests client.py
 """
 import unittest
-from unittest.mock import patch, PropertyMock
-from parameterized import parameterized
+from unittest.mock import patch, PropertyMock, Mock
+from parameterized import parameterized_class, parameterized
 
 from client import GithubOrgClient
 
-from utils import access_nested_map
+from utils import (
+    get_json,
+    access_nested_map,
+    memoize,
+)
+from fixtures import TEST_PAYLOAD
+
+@parameterized_class(('org_payload', 'repos_payload',
+                      'expected_repos', 'apache2_repos'), TEST_PAYLOAD)
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    test class
+    """
+    @classmethod
+    def setUpClass(cls):
+        # Start a patcher to mock requests.get(url).json()
+        cls.get_patcher = patch('requests.get')
+        cls.mock_get = cls.get_patcher.start()
+
+        # Configure the side_effect to return the correct payloads for different URLs
+        cls.mock_get.side_effect = [
+            Mock(json=lambda: cls.org_payload),
+            Mock(json=lambda: cls.repos_payload),
+        ]
+
+    @classmethod
+    def tearDownClass(cls):
+        # Stop the patcher to clean up
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        # Create an instance of GithubOrgClient with your organization name
+        org_name = 'google'
+        client = GithubOrgClient(org_name)
+
+        # Call the method you want to test
+        repos = client.public_repos()
+
+        # Assert that the result matches your expected value
+        self.assertEqual(repos, self.expected_repos)
 
 
 class TestGithubOrgClient(unittest.TestCase):
