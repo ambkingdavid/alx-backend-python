@@ -6,7 +6,7 @@ from utils import access_nested_map as access
 from utils import get_json, memoize
 from parameterized import parameterized
 from unittest.mock import Mock, patch
-from typing import Any, Dict, Mapping, Sequence
+from typing import Dict
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -63,6 +63,9 @@ class TestMemoize(unittest.TestCase):
         """
         class TestClass:
             def a_method(self):
+                """
+                a method
+                """
                 return 42
 
             @memoize
