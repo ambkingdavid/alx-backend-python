@@ -8,6 +8,8 @@ from parameterized import parameterized
 
 from client import GithubOrgClient
 
+from utils import access_nested_map
+
 
 class TestGithubOrgClient(unittest.TestCase):
     @parameterized.expand([
@@ -86,6 +88,15 @@ class TestGithubOrgClient(unittest.TestCase):
             self.assertEqual(p_repos, ["episodes.dart", "cpp-netlib"])
             mock_public_repos_url.assert_called_once()
         mock_get_json.assert_called_once_with(payload["repos_url"])
+
+    @parameterized.expand([
+        ({"license": {"key": "my_license"}}, "my_license", True),
+        ({"license": {"key": "other_license"}}, "my_license", False)
+    ])
+    def test_has_license(self, license, key, output):
+        """Tests the has_license static method"""
+        repo_to_check = GithubOrgClient.has_license(license, key)
+        self.assertEqual(repo_to_check, output)
 
 
 if __name__ == "__main__":
