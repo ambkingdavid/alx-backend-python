@@ -34,6 +34,7 @@ class TestAccessNestedMap(unittest.TestCase):
         with self.assertRaises(output):
             result = access(nested_map, path)
 
+
 class TestGetJson(unittest.TestCase):
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
@@ -50,6 +51,7 @@ class TestGetJson(unittest.TestCase):
             result = get_json(url)
             mock_get.assert_called_once_with(url)
             self.assertEqual(result, payload)
+
 
 class TestMemoize(unittest.TestCase):
     """
@@ -71,7 +73,6 @@ class TestMemoize(unittest.TestCase):
             self.assertEqual(test_obj.a_property, 42)
             self.assertEqual(test_obj.a_property, 42)
             pmock.assert_called_once()
-
 
 
 if __name__ == '__main__':
