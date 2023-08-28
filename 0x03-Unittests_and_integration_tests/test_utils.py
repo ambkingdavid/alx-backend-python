@@ -13,8 +13,9 @@ from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
-    def setUp(self) -> None:
-        print(f"Testing the AccessNestedMap Method")
+    """
+    test class
+    """
 
     @parameterized.expand([
         ({"a": 1}, ("a",), 1),
@@ -38,7 +39,6 @@ class TestAccessNestedMap(unittest.TestCase):
         """
         with self.assertRaises(output) as err:
             result = access_nested_map(nested_map, path)
-        # self.assertEqual(str(err.exception), output)
 
 
 class TestGetJson(unittest.TestCase):
