@@ -3,7 +3,7 @@
 This module tests client.py
 """
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
 
 from client import GithubOrgClient
@@ -23,6 +23,19 @@ class TestGithubOrgClient(unittest.TestCase):
         result = client.org
         mock_get_json.get_called_once_with(expected_url)
         self.assertEqual(result, output)
+
+    @parameterized.expand([
+        ("google", "https://api.github.com/orgs/adobe/repos"),
+        ("abc", "https://api.github.com/orgs/abc/repos"),
+        ('Netflix', "https://api.github.com/orgs/Netflix/repos")
+    ])
+    def test_public_repos_url(self, org_name, output):
+        with patch('client.GithubOrgClient._public_repos_url',
+                   new_callable=PropertyMock) as mock_public_repo_url:
+            mock_public_repo_url.return_value = output
+            client = GithubOrgClient(org_name)
+            result = client._public_repos_url
+            self.assertEqual(result, output)
 
 
 if __name__ == "__main__":
