@@ -15,6 +15,7 @@ from utils import (
 )
 from fixtures import TEST_PAYLOAD
 
+
 @parameterized_class(('org_payload', 'repos_payload',
                       'expected_repos', 'apache2_repos'), TEST_PAYLOAD)
 class TestIntegrationGithubOrgClient(unittest.TestCase):
@@ -27,7 +28,6 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher = patch('requests.get')
         cls.mock_get = cls.get_patcher.start()
 
-        # Configure the side_effect to return the correct payloads for different URLs
         cls.mock_get.side_effect = [
             Mock(json=lambda: cls.org_payload),
             Mock(json=lambda: cls.repos_payload),
