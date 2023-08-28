@@ -31,6 +31,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.mock_get.side_effect = [
             Mock(json=lambda: cls.org_payload),
             Mock(json=lambda: cls.repos_payload),
+            Mock(json=lambda: cls.org_payload),
+            Mock(json=lambda: cls.repos_payload),
         ]
 
     @classmethod
@@ -48,6 +50,17 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
         # Assert that the result matches your expected value
         self.assertEqual(repos, self.expected_repos)
+
+    def test_public_repos_with_license(self, license="apache-2.0"):
+        # Create an instance of GithubOrgClient with your organization name
+        org_name = 'google'
+        client = GithubOrgClient(org_name)
+
+        # Call the method you want to test
+        repos = client.public_repos(license)
+
+        # Assert that the result matches your expected value
+        self.assertEqual(repos, self.apache2_repos)
 
 
 class TestGithubOrgClient(unittest.TestCase):
