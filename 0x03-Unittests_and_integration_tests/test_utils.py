@@ -4,13 +4,6 @@
 import unittest
 from utils import access_nested_map as access
 from parameterized import parameterized
-from typing import (
-    Mapping,
-    Sequence,
-    Any,
-    Dict,
-    Callable,
-)
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -27,6 +20,14 @@ class TestAccessNestedMap(unittest.TestCase):
         result = access(data, path)
         self.assertEqual(result, expected_result)
 
+    @parameterized.expand([
+        ({}, ("a",)),
+        ({"a": 1}, ("a", "b")),
+    ])
+    def test_access_nested_map_exceptions(self, data, path):
+        """Test access_nested_map method exceptions"""
+        with self.assertRaises(KeyError):
+            access(data, path)
 
 
 if __name__ == '__main__':
