@@ -88,6 +88,5 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.assert_called_once_with(payload["repos_url"])
 
 
-
 if __name__ == "__main__":
     unittest.main()
