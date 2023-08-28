@@ -21,7 +21,7 @@ class TestGithubOrgClient(unittest.TestCase):
         mock_get_json.return_value = output
         client = GithubOrgClient(org_name)
         result = client.org
-        mock_get_json.get_called_once_with(expected_url)
+        mock_get_json.assert_called_once_with(expected_url)
         self.assertEqual(result, output)
 
     @parameterized.expand([

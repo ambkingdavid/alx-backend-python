@@ -1,38 +1,44 @@
 #!/usr/bin/env python3
-"""Test module"""
+
+"""
+This module tests the utils.access_nested_map, utils.memoize function
+"""
 
 import unittest
-from utils import access_nested_map as access
-from utils import get_json, memoize
-from parameterized import parameterized
+from typing import Any, Dict, Mapping, Sequence
 from unittest.mock import Mock, patch
-from typing import Dict
+
+from parameterized import parameterized
+from utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
-    """
-    Test utils methods
-    """
+    def setUp(self) -> None:
+        print(f"Testing the AccessNestedMap Method")
+
     @parameterized.expand([
-        ({"a": 1}, ["a"], 1),
-        ({"a": {"b": 2}}, ["a"], {"b": 2}),
-        ({"a": {"b": 2}}, ["a", "b"], 2),
+        ({"a": 1}, ("a",), 1),
+        ({"a": {"b": 2}}, ("a",), {"b": 2}),
+        ({"a": {"b": 2}}, ("a", "b"), 2)
     ])
-    def test_access_nested_map(self, data, path, expected_result):
-        """Test access_nested_map method"""
-        result = access(data, path)
-        self.assertEqual(result, expected_result)
+    def test_access_nested_map(self, nested_map: Mapping, path: Sequence,
+                               output: Any) -> None:
+        """TestCase for AccessNestedMap method"""
+        result = access_nested_map(nested_map, path)
+        self.assertEqual(result, output)
 
     @parameterized.expand([
         ({}, ("a",), KeyError),
-        ({"a": 1}, ("a", "b"), KeyError),
+        ({"a": 1}, ("a", "b"), KeyError)
     ])
-    def test_access_nested_map_exception(self, nested_map, path, output):
+    def test_access_nested_map_exception(self, nested_map: Mapping, path:
+                                         Sequence, output: Any) -> None:
         """
-        test_access_nested_map exception
+        TestCase for AccessNestedMap keyError
         """
-        with self.assertRaises(output):
-            result = access(nested_map, path)
+        with self.assertRaises(output) as err:
+            result = access_nested_map(nested_map, path)
+        # self.assertEqual(str(err.exception), output)
 
 
 class TestGetJson(unittest.TestCase):
@@ -53,36 +59,27 @@ class TestGetJson(unittest.TestCase):
             self.assertEqual(result, payload)
 
 
-# Define TestClass
-class TestClass:
-    def a_method(self):
-        return 42
-
-    @memoize
-    def a_property(self):
-        return self.a_method()
-
-
-# Define the test class
 class TestMemoize(unittest.TestCase):
-
+    """
+    Test memoize
+    """
     def test_memoize(self):
-        # Mock a_method
-        with patch.object(TestClass, 'a_method') as mock_a_method:
-            # Create an instance of TestClass
+        """
+        TestCase for utils.memoize
+        """
+        class TestClass:
+            def a_method(self):
+                return 42
+
+            @memoize
+            def a_property(self):
+                return self.a_method()
+        with patch.object(TestClass, 'a_method', return_value=42) as pmock:
             test_obj = TestClass()
-
-            # Call a_property twice
-            result1 = test_obj.a_property()
-            result2 = test_obj.a_property()
-
-            # Assert that a_method is called only once
-            mock_a_method.assert_called_once()
-
-            # Assert that the results are correct
-            self.assertEqual(result1, 42)
-            self.assertEqual(result2, 42)
+            self.assertEqual(test_obj.a_property, 42)
+            self.assertEqual(test_obj.a_property, 42)
+            pmock.assert_called_once()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
