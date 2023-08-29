@@ -24,7 +24,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        # Start a patcher to mock requests.get(url).json()
+        """Start a patcher to mock requests.get(url).json()"""
         cls.get_patcher = patch('requests.get')
         cls.mock_get = cls.get_patcher.start()
 
@@ -37,7 +37,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Stop the patcher to clean up
+        """
+        Stop the patcher to clean up
+        """
         cls.get_patcher.stop()
 
     def test_public_repos(self):
@@ -68,6 +70,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
 
 class TestGithubOrgClient(unittest.TestCase):
+    """
+    test class
+    """
     @parameterized.expand([
         ("google", {"key": "value"}),
         ("abc", {"key": "value"})
@@ -88,6 +93,9 @@ class TestGithubOrgClient(unittest.TestCase):
         ('Netflix', "https://api.github.com/orgs/Netflix/repos")
     ])
     def test_public_repos_url(self, org_name, output):
+        """
+        test method
+        """
         with patch('client.GithubOrgClient._public_repos_url',
                    new_callable=PropertyMock) as mock_public_repo_url:
             mock_public_repo_url.return_value = output
