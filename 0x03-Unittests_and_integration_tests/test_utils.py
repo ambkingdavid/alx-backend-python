@@ -48,7 +48,7 @@ class TestGetJson(unittest.TestCase):
     ])
     def test_get_json(self, url: str, payload: Dict):
         """
-        TestCase 
+        TestCase
         for get_json method
         """
         with patch('utils.requests.get') as mock_get:
