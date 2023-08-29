@@ -41,7 +41,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        # Create an instance of GithubOrgClient with your organization name
+        """
+        Create an instance of GithubOrgClient with your organization name
+        """
         org_name = 'google'
         client = GithubOrgClient(org_name)
 
@@ -52,7 +54,9 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         self.assertEqual(repos, self.expected_repos)
 
     def test_public_repos_with_license(self, license="apache-2.0"):
-        # Create an instance of GithubOrgClient with your organization name
+        """
+        Create an instance of GithubOrgClient with your organization name
+        """
         org_name = 'google'
         client = GithubOrgClient(org_name)
 
