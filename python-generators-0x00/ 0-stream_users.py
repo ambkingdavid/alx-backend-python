@@ -1,6 +1,24 @@
 #!/usr/bin/python3
 import mysql.connector
-from seed import connect_to_prodev
+
+
+# Replace with your MySQL credentials
+MYSQL_USER = "root"
+MYSQL_PASSWORD = ""
+MYSQL_HOST = "localhost"
+
+def connect_to_prodev():
+    """Connects to the ALX_prodev database."""
+    try:
+        connection = mysql.connector.connect(
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            host=MYSQL_HOST,
+            database="ALX_prodev"
+        )
+        return connection
+    except mysql.connector.Error:
+        return None
 
 def stream_users():
     """
