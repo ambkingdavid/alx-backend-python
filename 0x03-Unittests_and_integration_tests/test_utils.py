@@ -8,8 +8,8 @@ import unittest
 from typing import Any, Dict, Mapping, Sequence
 from unittest.mock import Mock, patch
 
-from parameterized import parameterized
-from utils import access_nested_map, get_json, memoize
+from parameterized import parameterized # type: ignore
+from utils import access_nested_map, get_json, memoize # type: ignore
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -17,37 +17,37 @@ class TestAccessNestedMap(unittest.TestCase):
     test class
     """
 
-    @parameterized.expand([
+    @parameterized.expand([ # type: ignore
         ({"a": 1}, ("a",), 1),
         ({"a": {"b": 2}}, ("a",), {"b": 2}),
         ({"a": {"b": 2}}, ("a", "b"), 2)
-    ])
-    def test_access_nested_map(self, nested_map: Mapping, path: Sequence,
+    ]) 
+    def test_access_nested_map(self, nested_map: Mapping[str, Any], path: Sequence[str],
                                output: Any) -> None:
         """TestCase for AccessNestedMap method"""
         result = access_nested_map(nested_map, path)
         self.assertEqual(result, output)
 
-    @parameterized.expand([
+    @parameterized.expand([ # type: ignore
         ({}, ("a",), KeyError),
         ({"a": 1}, ("a", "b"), KeyError)
     ])
-    def test_access_nested_map_exception(self, nested_map: Mapping, path:
-                                         Sequence, output: Any) -> None:
+    def test_access_nested_map_exception(self, nested_map: Mapping[str, Any], path:
+                                         Sequence[str], output: Any) -> None:
         """
         TestCase for AccessNestedMap keyError
         """
-        with self.assertRaises(output) as err:
-            result = access_nested_map(nested_map, path)
+        with self.assertRaises(output):
+            access_nested_map(nested_map, path)
 
 
 class TestGetJson(unittest.TestCase):
     """"Test class"""
-    @parameterized.expand([
+    @parameterized.expand([  # type: ignore
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False})
-    ])
-    def test_get_json(self, url: str, payload: Dict):
+    ])  # type: ignore
+    def test_get_json(self, url: str, payload: Dict[str, Any]):
         """
         TestCase
         for get_json method
@@ -56,7 +56,7 @@ class TestGetJson(unittest.TestCase):
             mock_response = Mock()
             mock_response.json.return_value = payload
             mock_get.return_value = mock_response
-            result = get_json(url)
+            result: Dict[str, Any] = get_json(url) # type: ignore
             mock_get.assert_called_once_with(url)
             self.assertEqual(result, payload)
 
@@ -70,19 +70,19 @@ class TestMemoize(unittest.TestCase):
         TestCase for utils.memoize
         """
         class TestClass:
-            def a_method(self):
+            def a_method(self) -> int:
                 return 42
 
             @memoize
-            def a_property(self):
+            def a_property(self) -> int:
                 return self.a_method()
         with patch.object(TestClass, 'a_method',
                           return_value=42) as mock_a_method:
             test_obj = TestClass()
 
             # Call a_property twice
-            result1 = test_obj.a_property
-            result2 = test_obj.a_property
+            result1 = test_obj.a_property # type: ignore
+            result2 = test_obj.a_property # type: ignore
 
             # Assert that a_method is called only once
             mock_a_method.assert_called_once()
