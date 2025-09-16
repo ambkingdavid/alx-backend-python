@@ -3,6 +3,7 @@ from .models import User, Conversation, Message
 
 
 class UserSerializer(serializers.ModelSerializer[User]):
+    role = serializers.CharField(read_only=True)
     class Meta: # type: ignore
         model = User
         fields = [
