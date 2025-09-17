@@ -1,65 +1,53 @@
-from __future__ import annotations
-from typing import Any
-
-from django.shortcuts import get_object_or_404
-from django.db.models import QuerySet
-from rest_framework import viewsets, status, filters
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
+from rest_framework import viewsets, mixins, status
 from rest_framework.request import Request
-
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from typing import cast, Optional
 
-
-class ConversationViewSet(viewsets.ModelViewSet[Conversation]):
-    queryset: QuerySet[Conversation] = Conversation.objects.all()
+class ConversationViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing conversations.
+    """
+    queryset = Conversation.objects.all().order_by('-created_at')
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter]  # ✅ Added filter backend
-    search_fields = ['participants__email']   # Example filter
 
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        participant_ids: list[str] = request.data.get("participants", [])
-        if not participant_ids:
-            return Response({"error": "Participants list is required."},
-                            status=status.HTTP_400_BAD_REQUEST)
+    @action(detail=True, methods=['post'])
+    def send_message(self, request: Request, pk: Optional[str] = None) -> Response:
+        """
+        Send a new message to an existing conversation.
+        """
+        try:
+            conversation: Conversation = self.get_object()
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Conversation not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        participants = User.objects.filter(user_id__in=participant_ids)
-        if not participants.exists():
-            return Response({"error": "No valid participants found."},
-                            status=status.HTTP_400_BAD_REQUEST)
+        # Use 'cast' to tell mypy that request.user is an instance of your User model
+        sender: User = cast(User, request.user)
+        
+        # Check if the user is a participant in the conversation
+        if not conversation.participants.filter(pk=sender.pk).exists(): # type: ignore
+            return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
 
-        conversation = Conversation.objects.create()
-        conversation.participants.set(participants)
-        conversation.save()
+        message_body: str = request.data.get('message_body', '')
+        if not message_body:
+            return Response({'error': 'Message body is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(conversation)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class MessageViewSet(viewsets.ModelViewSet[Message]):
-    queryset: QuerySet[Message] = Message.objects.all()
-    serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter]  # ✅ Added filter backend
-    search_fields = ['message_body', 'sender__email']  # Example filter
-
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        conversation_id: str | None = request.data.get("conversation_id")
-        message_body: str | None = request.data.get("message_body")
-
-        if not conversation_id or not message_body:
-            return Response({"error": "conversation_id and message_body are required."},
-                            status=status.HTTP_400_BAD_REQUEST)
-
-        conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
-
-        message = Message.objects.create(
-            sender=request.user,  # type: ignore[arg-type]
+        message: Message = Message.objects.create(
             conversation=conversation,
+            sender=sender,
             message_body=message_body
         )
-
-        serializer = self.get_serializer(message)
+        serializer: MessageSerializer = MessageSerializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+class MessageViewSet(mixins.CreateModelMixin,
+                   mixins.ListModelMixin,
+                   mixins.RetrieveModelMixin,
+                   viewsets.GenericViewSet):
+    """
+    A viewset for listing and retrieving messages.
+    """
+    queryset = Message.objects.all().order_by('-sent_at')
+    serializer_class = MessageSerializer

@@ -1,45 +1,25 @@
 from rest_framework import serializers
 from .models import User, Conversation, Message
+from typing import Any, Dict
 
-
-class UserSerializer(serializers.ModelSerializer): # type: ignore
-    role = serializers.CharField(read_only=True) 
-
-    class Meta: # type: ignore
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
         model = User
-        fields = [
-            'user_id', 'first_name', 'last_name',
-            'email', 'phone_number', 'role', 'created_at'
-        ]
+        fields = ['user_id', 'username', 'first_name', 'last_name', 'email', 'phone_number', 'role']
 
+class MessageSerializer(serializers.ModelSerializer):
+    sender: serializers.Serializer = serializers.StringRelatedField() # type: ignore
 
-class MessageSerializer(serializers.ModelSerializer): # type: ignore
-    sender = UserSerializer(read_only=True)
-
-    class Meta: # type: ignore
+    class Meta:
         model = Message
-        fields = ['message_id', 'sender', 'message_body', 'sent_at']
+        fields = ['message_id', 'conversation', 'sender', 'message_body', 'sent_at']
+        read_only_fields = ['sent_at', 'message_id']
 
-    def validate_message_body(self, value): # type: ignore
-        """Ensure message body is not empty."""
-        if not value.strip(): # type: ignore
-            raise serializers.ValidationError("Message body cannot be empty.")
-        return value # type: ignore
+class ConversationSerializer(serializers.ModelSerializer):
+    participants: serializers.Serializer = UserSerializer(many=True, read_only=True) # type: ignore
+    messages: serializers.Serializer = MessageSerializer(many=True, read_only=True) # type: ignore
 
-
-class ConversationSerializer(serializers.ModelSerializer): # type: ignore
-    participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True)
-    message_count = serializers.SerializerMethodField() # type: ignore
-
-    class Meta: # type: ignore
+    class Meta:
         model = Conversation
-        fields = [
-            'conversation_id', 'participants',
-            'created_at', 'messages', 'message_count'
-        ]
-
-    def get_message_count(self, obj): # type: ignore
-        """Return the number of messages in this conversation."""
-        return obj.messages.count() # type: ignore
-
+        fields = ['conversation_id', 'participants', 'created_at', 'messages']
+        read_only_fields = ['conversation_id', 'created_at']
