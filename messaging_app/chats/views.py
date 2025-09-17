@@ -1,3 +1,5 @@
+# messaging_app/chats/views.py
+
 from rest_framework import viewsets, mixins, status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -23,10 +25,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
         except Conversation.DoesNotExist:
             return Response({'error': 'Conversation not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Use 'cast' to tell mypy that request.user is an instance of your User model
         sender: User = cast(User, request.user)
         
-        # Check if the user is a participant in the conversation
         if not conversation.participants.filter(pk=sender.pk).exists(): # type: ignore
             return Response({'error': 'You are not a participant in this conversation'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -47,7 +47,14 @@ class MessageViewSet(mixins.CreateModelMixin,
                    mixins.RetrieveModelMixin,
                    viewsets.GenericViewSet):
     """
-    A viewset for listing and retrieving messages.
+    A viewset for listing and retrieving messages within a conversation.
     """
-    queryset = Message.objects.all().order_by('-sent_at')
     serializer_class = MessageSerializer
+
+    def get_queryset(self):
+        """
+        This view should return a list of all messages for the parent conversation.
+        """
+        # The parent lookup keyword is 'conversation_pk'
+        conversation_pk = self.kwargs['conversation_pk']
+        return Message.objects.filter(conversation__pk=conversation_pk).order_by('-sent_at')
